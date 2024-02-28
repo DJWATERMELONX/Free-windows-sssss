@@ -24,7 +24,6 @@ G_DECLARE_FINAL_TYPE (
 
 TYPEDEF_STRUCT_UNDERSCORED (ArrangerWrapperWidget);
 TYPEDEF_STRUCT_UNDERSCORED (PianoRollKeysWidget);
-TYPEDEF_STRUCT_UNDERSCORED (VelocitySettingsWidget);
 
 /**
  * @addtogroup widgets
@@ -56,9 +55,8 @@ typedef struct _MidiEditorSpaceWidget
   ArrangerWrapperWidget * arranger_wrapper;
   ArrangerWidget *        modifier_arranger;
 
-  VelocitySettingsWidget * velocity_settings;
-  GtkBox *                 midi_vel_chooser_box;
-  GtkComboBoxText *        midi_modifier_chooser;
+  GtkBox *          midi_vel_chooser_box;
+  GtkComboBoxText * midi_modifier_chooser;
 
   /** Vertical size goup for the keys and the
    * arranger. */

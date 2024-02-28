@@ -1,5 +1,6 @@
 // clang-format off
 // SPDX-FileCopyrightText: © 2019, 2021-2023 Alexandros Theodotou <alex@zrythm.org>
+// SPDX-FileCopyrightText: © 2024 Miró Allard <miro.allard@pm.me>
 // SPDX-License-Identifier: LicenseRef-ZrythmLicense
 // clang-format on
 
@@ -23,7 +24,6 @@
 #include "gui/widgets/midi_note.h"
 #include "gui/widgets/piano_roll_keys.h"
 #include "gui/widgets/ruler.h"
-#include "gui/widgets/velocity_settings.h"
 #include "project.h"
 #include "utils/flags.h"
 #include "utils/gtk.h"
@@ -187,7 +187,6 @@ static void
 midi_editor_space_widget_init (MidiEditorSpaceWidget * self)
 {
   g_type_ensure (PIANO_ROLL_KEYS_WIDGET_TYPE);
-  g_type_ensure (VELOCITY_SETTINGS_WIDGET_TYPE);
   g_type_ensure (ARRANGER_WRAPPER_WIDGET_TYPE);
 
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -251,7 +250,6 @@ midi_editor_space_widget_class_init (MidiEditorSpaceWidgetClass * _klass)
   BIND_CHILD (piano_roll_keys);
   BIND_CHILD (midi_arranger_velocity_paned);
   BIND_CHILD (arranger_wrapper);
-  BIND_CHILD (velocity_settings);
   BIND_CHILD (modifier_arranger);
   BIND_CHILD (midi_notes_box);
   BIND_CHILD (midi_vel_chooser_box);

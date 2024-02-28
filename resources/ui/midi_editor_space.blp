@@ -43,17 +43,8 @@ template $MidiEditorSpaceWidget : Gtk.Widget {
           ]
         }
       }
-      Gtk.Box midi_modifier_toolbar_and_arranger_box {
-        orientation: vertical;
-        Gtk.Box midi_modifier_toolbar {
-          styles [
-            "toolbar",
-          ]
-          $VelocitySettingsWidget velocity_settings { }
-        }
-        $ArrangerWidget modifier_arranger {
-          vexpand: true;
-        }
+      $ArrangerWidget modifier_arranger {
+        vexpand: true;
       }
     }
   }
