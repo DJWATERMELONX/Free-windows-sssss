@@ -2,6 +2,7 @@ using Gtk 4.0;
 
 template $MidiEditorSpaceWidget : Gtk.Widget {
   Gtk.Paned midi_arranger_velocity_paned {
+    wide-handle: true;
     hexpand: true;
     focusable: true;
     orientation: vertical;
@@ -45,17 +46,8 @@ template $MidiEditorSpaceWidget : Gtk.Widget {
           ]
         }
       }
-      Gtk.Box midi_modifier_toolbar_and_arranger_box {
-        orientation: vertical;
-        Gtk.Box midi_modifier_toolbar {
-          styles [
-            "toolbar",
-          ]
-          $VelocitySettingsWidget velocity_settings { }
-        }
-        $ArrangerWidget modifier_arranger {
-          vexpand: true;
-        }
+      $ArrangerWidget modifier_arranger {
+        vexpand: true;
       }
     }
   }
