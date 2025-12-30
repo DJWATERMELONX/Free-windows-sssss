@@ -184,3 +184,10 @@ jobs:
           ninja -C build
           meson test -C build
           meson install -C build
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrythm-windows-installer
+          path: /c/src/zrythm-installer/build/*.exe
+          if-no-files-found: error
+          retention-days: 30
