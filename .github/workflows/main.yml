@@ -9,60 +9,79 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-2022  # Windows 11 compatible runner
+    runs-on: windows-2022
 
     steps:
-      # 1. Checkout the v1 branch
       - name: Checkout Zrythm v1
         uses: actions/checkout@v4
         with:
           ref: v1
 
-      # 2. Install MSYS2 and required packages
       - name: Setup MSYS2
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           update: true
           install: >-
-            git
             base-devel
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-meson
             mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-gtk4
-            mingw-w64-x86_64-carla
-            mingw-w64-x86_64-lv2
-            mingw-w64-x86_64-lilv
-            mingw-w64-x86_64-serd
-            mingw-w64-x86_64-sord
-            mingw-w64-x86_64-sratom
-            mingw-w64-x86_64-jack
-            mingw-w64-x86_64-portaudio
-            mingw-w64-x86_64-rubberband
-            mingw-w64-x86_64-libsamplerate
-            mingw-w64-x86_64-fftw
-            mingw-w64-x86_64-libyaml
-            mingw-w64-x86_64-pcre2
-            mingw-w64-x86_64-json-glib
-            mingw-w64-x86_64-libadwaita
-            mingw-w64-x86_64-python
-            mingw-w64-x86_64-python-pip
-            mingw-w64-x86_64-gobject-introspection
-            mingw-w64-x86_64-gtksourceview5
-            mingw-w64-x86_64-libcyaml
-            unzip
-            wget
-            rsync
 
-      # 3. Install Python dependencies for Meson & build scripts
+      # Batch 1: Core audio/graphics deps
+      - name: Install core dependencies (batch 1)
+        shell: msys2 {0}
+        run: |
+          pacman -S --needed --noconfirm \
+            mingw-w64-x86_64-gtk4 \
+            mingw-w64-x86_64-libadwaita \
+            mingw-w64-x86_64-gtksourceview5 \
+            mingw-w64-x86_64-carla \
+            mingw-w64-x86_64-lv2 \
+            mingw-w64-x86_64-lilv \
+            mingw-w64-x86_64-serd \
+            mingw-w64-x86_64-sord \
+            mingw-w64-x86_64-sratom
+
+      # Batch 2: Audio backends and utilities
+      - name: Install core dependencies (batch 2)
+        shell: msys2 {0}
+        run: |
+          pacman -S --needed --noconfirm \
+            mingw-w64-x86_64-jack \
+            mingw-w64-x86_64-portaudio \
+            mingw-w64-x86_64-rubberband \
+            mingw-w64-x86_64-libsamplerate \
+            mingw-w64-x86_64-fftw \
+            mingw-w64-x86_64-libyaml \
+            mingw-w64-x86_64-pcre2 \
+            mingw-w64-x86_64-json-glib \
+            mingw-w64-x86_64-python \
+            mingw-w64-x86_64-gobject-introspection \
+            mingw-w64-x86_64-libcyaml
+
+      # Batch 3: Extra tools (rarely cause issues)
+      - name: Install extra tools
+        shell: msys2 {0}
+        run: |
+          pacman -S --needed --noconfirm \
+            unzip wget rsync
+
+      # Final safety update + keyring refresh (helps with recent flakiness)
+      - name: Final system update and keyring refresh
+        shell: msys2 {0}
+        run: |
+          pacman-key --refresh-keys || true
+          pacman -Syu --noconfirm
+
+      # Install Python tools (meson/ninja via pip for latest versions)
       - name: Install Python packages
         shell: msys2 {0}
         run: |
           python -m pip install --upgrade pip
           python -m pip install meson ninja
 
-      # 4. Configure Meson build (optimized for Windows + Carla + GTK4)
+      # Meson setup
       - name: Meson setup
         shell: msys2 {0}
         run: |
@@ -86,30 +105,27 @@ jobs:
             -Db_lto=true \
             -Db_pie=true
 
-      # 5. Compile (using all CPU cores for speed)
+      # Compile
       - name: Compile Zrythm
         shell: msys2 {0}
         run: |
           meson compile -C build -j$(nproc)
 
-      # 6. Install into staging directory
+      # Install to staging
       - name: Meson install
         shell: msys2 {0}
         run: |
           meson install -C build --destdir=staging
 
-      # 7. Create portable .zip and .exe installer
+      # Package
       - name: Package artifacts
         shell: msys2 {0}
         run: |
           cd staging/mingw64
-          mv bin/zrythm.exe zrythm.exe
-          # Create portable zip
           zip -r ../../zrythm-windows-portable.zip .
-          # Create self-extracting installer with 7-Zip
-          7z a -sfx7zSD.sfx ../../zrythm-windows-installer.exe .
+          7z a -sfx7z.sfx ../../zrythm-windows-installer.exe .
 
-      # 8. Upload artifacts so you can download them
+      # Upload
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -117,13 +133,3 @@ jobs:
           path: |
             zrythm-windows-portable.zip
             zrythm-windows-installer.exe
-          retention-days: 14
-
-      # 9. Show success message with download instructions
-      - name: Build complete
-        shell: msys2 {0}
-        run: |
-          echo "Build finished successfully!"
-          echo "Download artifacts from the Actions summary page:"
-          echo "  - Portable version: zrythm-windows-portable.zip"
-          echo "  - Installer: zrythm-windows-installer.exe"
